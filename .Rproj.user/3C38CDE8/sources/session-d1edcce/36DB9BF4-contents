@@ -11,7 +11,7 @@ library(tidyverse)
 Function and visualization for P2E damage for weapons with striking rune 2
 
 ```{r}
-p2e_2d_damcalc <- function (to_hit_mod, dam_mod, ac){
+p2e_2d_damcalc <- function (to_hit_mod, dam_mod, ac, die_max){
   ### This function returns a vector of all possible damage outcomes for a P2E character doing two d6 damage die
   dam_vector <- c()
   
@@ -24,8 +24,8 @@ p2e_2d_damcalc <- function (to_hit_mod, dam_mod, ac){
     if (to_hit - ac < 0) {
       dam_vector <- c(dam_vector, rep(0, 36))  ### Need the 36 to balance against the number of outcomes for each hit
     } else {
-      for (d1 in 1:6) {
-        for (d2 in 1:6) {
+      for (d1 in 1:die_max) {
+        for (d2 in 1:die_max) {
           dam <- d1 + d2 + dam_mod
           if (crit) {dam <- dam * 2}
           dam_vector <- c(dam_vector, dam)
@@ -47,18 +47,49 @@ p2e_2d_damcalc(12, 3, 23)
 
 ```{r}
 ### Visualization function
-p2e_2d_damcalc(11, 4, 22) |>
-  group_by(dam_vector) |>
-  summarize(
-    dam_bins = n() / 720
-  ) |>
-  ggplot(aes(x = dam_vector, y = dam_bins)) +
-  geom_bar(stat = "identity", fill = "steelblue") +
-  theme_classic() +
-  labs(
-    x = "Damage",
-    y = "Probability"
-  )
 
+p2e_2d_dam_viz <- function (to_hit_mod, dam_mod, ac, dam_threshold){
+  
+  title_text <- str_c("To hit modifier: ", to_hit_mod,
+                      "; Damage modifier: ", dam_mod,
+                      "; AC: ", ac, ".")
+  
+  dam_df <- p2e_2d_damcalc(to_hit_mod = to_hit_mod, 
+                 dam_mod = dam_mod, 
+                 ac = ac) |>
+    group_by(dam_vector) |>
+    summarize(
+      dam_probs = n() / 720
+    )
+  
+  ratio_over_threshold <- dam_df |>
+    filter(dam_vector > dam_threshold) |>
+    summarize(
+      dam_prob = sum(dam_probs)
+    ) |>
+    pull(dam_prob) |>
+    round(2)
+  
+  caption_text <- str_c("Probability of a hiit greater than ", dam_threshold,
+                        " damage: ", ratio_over_threshold * 100, "%")
+  
+   dam_df |>
+    ggplot(aes(x = dam_vector, y = dam_probs)) +
+    geom_bar(stat = "identity", fill = "steelblue") +
+    theme_classic() +
+    labs(
+      x = "Damage",
+      y = "Probability",
+      title = title_text,
+      subtitle = caption_text
+    )
+}
+
+
+
+```
+
+```{r}
+p2e_2d_dam_viz(16, 4, 20, 7)
 ```
 
