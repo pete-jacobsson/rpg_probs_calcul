@@ -46,7 +46,7 @@
 "0","   dam_df |>"
 "0","    ggplot(aes(x = dam_vector, y = dam_probs)) +"
 "0","    geom_bar(stat = ""identity"", fill = ""steelblue"") +"
-"0","    theme_classic() +"
+"0","    theme_bw() +"
 "0","    labs("
 "0","      x = ""Damage"","
 "0","      y = ""Probability"","

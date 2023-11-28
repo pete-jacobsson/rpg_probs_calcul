@@ -213,7 +213,7 @@ p2e_twf_2d_dam_viz <- function(to_hit_mod_1,
    dam_df |>
     ggplot(aes(x = dam_vector, y = dam_probs)) +
     geom_bar(stat = "identity", fill = "steelblue") +
-    theme_classic() +
+    theme_bw() +
     labs(
       x = "Damage",
       y = "Probability",
