@@ -11,7 +11,7 @@ library(tidyverse)
 Function and visualization for P2E damage for weapons with striking rune 2
 
 ```{r}
-p2e_2d_damcalc <- function (to_hit_mod, dam_mod, ac, die_max){
+p2e_2d_damcalc <- function(to_hit_mod, dam_mod, ac, die_max) {
   ### This function returns a vector of all possible damage outcomes for a P2E character doing two d6 damage die
   dam_vector <- c()
   
@@ -48,7 +48,7 @@ p2e_2d_damcalc(12, 3, 23, 8)
 ```{r}
 ### Visualization function
 
-p2e_2d_dam_viz <- function (to_hit_mod, dam_mod, ac, die_max, dam_threshold){
+p2e_2d_dam_viz <- function(to_hit_mod, dam_mod, ac, die_max, dam_threshold) {
   
   title_text <- str_c("To hit modifier: ", to_hit_mod,
                       "; Damage modifier: ", dam_mod,
@@ -100,7 +100,7 @@ p2e_2d_dam_viz <- function (to_hit_mod, dam_mod, ac, die_max, dam_threshold){
 ```{r}
 p2e_2d_dam_viz(to_hit_mod =  16, 
                dam_mod = 4, 
-               ac = 15, 
+               ac = 25, 
                die_max = 12,
                dam_threshold = 10)
 ```
@@ -111,12 +111,12 @@ p2e_2d_dam_viz(to_hit_mod =  16,
 ## TWF 2-die weapons
 
 ```{r}
-p2e_twf_2d_damcalc <- function (to_hit_mod_1,
-                                to_hit_mod_2,
-                                dam_mod,
-                                ac,
-                                die_max_1,
-                                die_max_2){
+p2e_twf_2d_damcalc <- function(to_hit_mod_1,
+                               to_hit_mod_2,
+                               dam_mod,
+                               ac,
+                               die_max_1,
+                               die_max_2) {
   ###Get outcomes for attacking with two weapons, each of which may have a different to hit modifier and a different damage die
   dam_vector <- c()
   
@@ -165,6 +165,168 @@ dam_df
 
 
 ```{r}
-c(1,2,3) + 1
+p2e_twf_2d_dam_viz <- function(to_hit_mod_1,
+                               to_hit_mod_2,
+                               dam_mod,
+                               ac,
+                               die_max_1,
+                               die_max_2,
+                               dam_threshold) {
+   
+  title_text <- str_c("To hit modifier (weapon 1): ", to_hit_mod_1,
+                      "; To hit modifier (weapon 2): ", to_hit_mod_2,
+                      ";\nWepon die (weapon 1): d", die_max_1,
+                      "; Wepon die (weapon 2): d", die_max_2,
+                      ";\nDamage modifier: ", dam_mod,
+                      "; AC: ", ac, "."
+                      )
+  
+  
+  
+  dam_df <- p2e_twf_2d_damcalc(to_hit_mod_1 = to_hit_mod_1,
+                               to_hit_mod_2 = to_hit_mod_2,
+                               dam_mod = dam_mod,
+                               ac = ac,
+                               die_max_1 = die_max_1,
+                               die_max_2 = die_max_2)
+  
+  n_outcomes <- nrow(dam_df)
+  
+  dam_df <- dam_df |>
+    group_by(dam_vector) |>
+    summarize(
+      dam_probs = n() / n_outcomes
+    )
+
+  
+  ratio_over_threshold <- dam_df |>
+    filter(dam_vector > dam_threshold) |>
+    summarize(
+      dam_prob = sum(dam_probs)
+    ) |>
+    pull(dam_prob) |>
+    round(2)
+  
+  caption_text <- str_c("Probability of a hit greater than ", dam_threshold,
+                        " damage: ", ratio_over_threshold * 100, "%")
+  
+   dam_df |>
+    ggplot(aes(x = dam_vector, y = dam_probs)) +
+    geom_bar(stat = "identity", fill = "steelblue") +
+    theme_classic() +
+    labs(
+      x = "Damage",
+      y = "Probability",
+      title = title_text,
+      subtitle = caption_text
+    )
+}
 ```
 
+
+
+### Compare vs Threshold 10
+
+```{r}
+p2e_twf_2d_dam_viz(to_hit_mod_1 = 16,
+                   to_hit_mod_2 = 14,
+                   dam_mod = 4,
+                   ac = 25,
+                   die_max_1 = 6,
+                   die_max_2 = 6,
+                   dam_threshold = 10)
+```
+
+
+```{r}
+p2e_twf_2d_dam_viz(to_hit_mod_1 = 16,
+                   to_hit_mod_2 = 16,
+                   dam_mod = 4,
+                   ac = 25,
+                   die_max_1 = 8,
+                   die_max_2 = 6,
+                   dam_threshold = 10)
+```
+
+
+
+```{r}
+p2e_twf_2d_dam_viz(to_hit_mod_1 = 16,
+                   to_hit_mod_2 = 11,
+                   dam_mod = 4,
+                   ac = 25,
+                   die_max_1 = 12,
+                   die_max_2 = 12,
+                   dam_threshold = 10)
+```
+
+
+
+### Compare vs Threshold 20
+```{r}
+p2e_twf_2d_dam_viz(to_hit_mod_1 = 16,
+                   to_hit_mod_2 = 14,
+                   dam_mod = 4,
+                   ac = 25,
+                   die_max_1 = 6,
+                   die_max_2 = 6,
+                   dam_threshold = 20)
+```
+
+
+```{r}
+p2e_twf_2d_dam_viz(to_hit_mod_1 = 16,
+                   to_hit_mod_2 = 16,
+                   dam_mod = 4,
+                   ac = 25,
+                   die_max_1 = 8,
+                   die_max_2 = 6,
+                   dam_threshold = 20)
+```
+
+
+
+```{r}
+p2e_twf_2d_dam_viz(to_hit_mod_1 = 16,
+                   to_hit_mod_2 = 11,
+                   dam_mod = 4,
+                   ac = 25,
+                   die_max_1 = 12,
+                   die_max_2 = 12,
+                   dam_threshold = 20)
+```
+
+
+
+
+## Damage vs PC
+```{r}
+p2e_twf_2d_dam_viz(to_hit_mod_1 = 18,
+                   to_hit_mod_2 = 13,
+                   dam_mod = 8,
+                   ac = 26,
+                   die_max_1 = 8,
+                   die_max_2 = 8,
+                   dam_threshold = 15)
+```
+
+
+```{r}
+p2e_twf_2d_dam_viz(to_hit_mod_1 = 18,
+                   to_hit_mod_2 = 13,
+                   dam_mod = 8,
+                   ac = 25,
+                   die_max_1 = 8,
+                   die_max_2 = 8,
+                   dam_threshold = 15)
+```
+
+```{r}
+p2e_twf_2d_dam_viz(to_hit_mod_1 = 18,
+                   to_hit_mod_2 = 13,
+                   dam_mod = 8,
+                   ac = 24,
+                   die_max_1 = 8,
+                   die_max_2 = 8,
+                   dam_threshold = 15)
+```
