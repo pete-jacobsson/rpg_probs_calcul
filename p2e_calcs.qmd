@@ -1,0 +1,46 @@
+---
+title: "P2E first pass"
+format: html
+---
+
+Function and visualization for P2E damage for weapons with striking rune 2
+
+```{r}
+p2e_2d_damcalc <- function (to_hit_mod, dam_mod, ac){
+  ### This function returns a vector of all possible damage outcomes for a P2E character doing two d6 damage die
+  dam_vector <- c()
+  
+  for (d20 in 1:20) {
+    to_hit <- d20 + to_hit_mod
+    crit <- FALSE
+    
+    if (d20 == 20 | to_hit - ac >= 10) {crit <- TRUE}
+    
+    if (to_hit - ac < 0) {
+      dam_vector <- c(dam_vector, rep(0, 36))  ### Need the 36 to balance against the number of outcomes for each hit
+    } else {
+      for (d1 in 1:6) {
+        for (d2 in 1:6) {
+          dam <- d1 + d2 + dam_mod
+          if (crit) {dam <- dam * 2}
+          dam_vector <- c(dam_vector, dam)
+        }
+      }
+    }
+    
+  }
+  
+  dam_df <- data.frame(dam_vector)
+  
+  dam_df
+}
+```
+
+```{r}
+p2e_2d_damcalc(12, 3, 23)
+```
+
+```{r}
+### Visualize
+```
+
