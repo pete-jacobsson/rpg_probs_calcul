@@ -3,9 +3,9 @@
     "path": "~/Documents/GitHub/rpg_probs_calcul/p2e_calcs.qmd",
     "project_path": "p2e_calcs.qmd",
     "type": "quarto_markdown",
-    "hash": "0",
+    "hash": "3929550842",
     "contents": "",
-    "dirty": true,
+    "dirty": false,
     "created": 1701158794868.0,
     "source_on_save": false,
     "relative_order": 1,
@@ -17,11 +17,11 @@
         "scrollLine": "46"
     },
     "folds": "",
-    "lastKnownWriteTime": 1701160551,
+    "lastKnownWriteTime": 1701161951,
     "encoding": "UTF-8",
     "collab_server": "",
     "source_window": "",
-    "last_content_update": 1701161927814,
+    "last_content_update": 1701161951593,
     "read_only": false,
     "read_only_alternatives": []
 }

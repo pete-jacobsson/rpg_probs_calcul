@@ -2,7 +2,12 @@
 title: "P2E first pass"
 format: html
 ---
+```{r}
+library(tidyverse)
+```
 
+
+## Single 2d6 weapon, 
 Function and visualization for P2E damage for weapons with striking rune 2
 
 ```{r}
@@ -41,6 +46,19 @@ p2e_2d_damcalc(12, 3, 23)
 ```
 
 ```{r}
-### Visualize
+### Visualization function
+p2e_2d_damcalc(11, 4, 22) |>
+  group_by(dam_vector) |>
+  summarize(
+    dam_bins = n() / 720
+  ) |>
+  ggplot(aes(x = dam_vector, y = dam_bins)) +
+  geom_bar(stat = "identity", fill = "steelblue") +
+  theme_classic() +
+  labs(
+    x = "Damage",
+    y = "Probability"
+  )
+
 ```
 
