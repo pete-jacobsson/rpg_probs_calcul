@@ -7,7 +7,7 @@ library(tidyverse)
 ```
 
 
-## Single 2d6 weapon, 
+## Single 2-die weapon 
 Function and visualization for P2E damage for weapons with striking rune 2
 
 ```{r}
@@ -21,8 +21,8 @@ p2e_2d_damcalc <- function (to_hit_mod, dam_mod, ac, die_max){
     
     if (d20 == 20 | to_hit - ac >= 10) {crit <- TRUE}
     
-    if (to_hit - ac < 0 & !crit) {
-      dam_vector <- c(dam_vector, rep(0, 36))  ### Need the 36 to balance against the number of outcomes for each hit
+    if ((to_hit - ac < 0 & !crit) | d20 == 1) {
+      dam_vector <- c(dam_vector, rep(0, die_max ^ 2))  ### Need to balance against the number of outcomes for each hit
     } else {
       for (d1 in 1:die_max) {
         for (d2 in 1:die_max) {
@@ -98,10 +98,73 @@ p2e_2d_dam_viz <- function (to_hit_mod, dam_mod, ac, die_max, dam_threshold){
 ```
 
 ```{r}
-p2e_2d_dam_viz(to_hit_mod =  11, 
+p2e_2d_dam_viz(to_hit_mod =  16, 
                dam_mod = 4, 
-               ac = 26, 
+               ac = 15, 
                die_max = 12,
                dam_threshold = 10)
+```
+
+
+
+
+## TWF 2-die weapons
+
+```{r}
+p2e_twf_2d_damcalc <- function (to_hit_mod_1,
+                                to_hit_mod_2,
+                                dam_mod,
+                                ac,
+                                die_max_1,
+                                die_max_2){
+  ###Get outcomes for attacking with two weapons, each of which may have a different to hit modifier and a different damage die
+  dam_vector <- c()
+  
+  weapon_1_dam <- p2e_2d_damcalc(to_hit_mod = to_hit_mod_1,
+                                 dam_mod = dam_mod,
+                                 ac = ac,
+                                 die_max = die_max_1) |>
+    pull(dam_vector)
+  
+  for (outcome in weapon_1_dam) {
+    weapon_2_dam <- p2e_2d_damcalc(to_hit_mod = to_hit_mod_2,
+                                   dam_mod = dam_mod,
+                                   ac = ac,
+                                   die_max = die_max_2) |>
+    pull(dam_vector)
+    
+    dam_vector <- c(dam_vector, weapon_2_dam + outcome)
+  }
+  
+  dam_df <- data.frame(dam_vector)
+  
+  dam_df
+  
+}
+```
+
+
+```{r}
+dam_df <- p2e_twf_2d_damcalc(to_hit_mod_1 = 12,
+                             to_hit_mod_2 = 12,
+                             dam_mod = 3,
+                             ac = 23,
+                             die_max_1 = 2,
+                             die_max_2 = 2)
+
+n_outcomes <- nrow(dam_df)
+  
+dam_df <- dam_df |>
+  group_by(dam_vector) |>
+  summarize(
+    dam_probs = n() / n_outcomes
+  )
+
+dam_df
+```
+
+
+```{r}
+c(1,2,3) + 1
 ```
 
