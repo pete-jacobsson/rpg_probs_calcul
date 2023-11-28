@@ -21,7 +21,7 @@ p2e_2d_damcalc <- function (to_hit_mod, dam_mod, ac, die_max){
     
     if (d20 == 20 | to_hit - ac >= 10) {crit <- TRUE}
     
-    if (to_hit - ac < 0) {
+    if (to_hit - ac < 0 & !crit) {
       dam_vector <- c(dam_vector, rep(0, 36))  ### Need the 36 to balance against the number of outcomes for each hit
     } else {
       for (d1 in 1:die_max) {
@@ -42,24 +42,32 @@ p2e_2d_damcalc <- function (to_hit_mod, dam_mod, ac, die_max){
 ```
 
 ```{r}
-p2e_2d_damcalc(12, 3, 23)
+p2e_2d_damcalc(12, 3, 23, 8)
 ```
 
 ```{r}
 ### Visualization function
 
-p2e_2d_dam_viz <- function (to_hit_mod, dam_mod, ac, dam_threshold){
+p2e_2d_dam_viz <- function (to_hit_mod, dam_mod, ac, die_max, dam_threshold){
   
   title_text <- str_c("To hit modifier: ", to_hit_mod,
                       "; Damage modifier: ", dam_mod,
-                      "; AC: ", ac, ".")
+                      "; AC: ", ac, 
+                      "; Wepon die: d", die_max, ".")
+  
+  
   
   dam_df <- p2e_2d_damcalc(to_hit_mod = to_hit_mod, 
                  dam_mod = dam_mod, 
-                 ac = ac) |>
+                 ac = ac,
+                 die_max = die_max)
+  
+  n_outcomes <- nrow(dam_df)
+  
+  dam_df <- dam_df |>
     group_by(dam_vector) |>
     summarize(
-      dam_probs = n() / 720
+      dam_probs = n() / n_outcomes
     )
   
   ratio_over_threshold <- dam_df |>
@@ -70,7 +78,7 @@ p2e_2d_dam_viz <- function (to_hit_mod, dam_mod, ac, dam_threshold){
     pull(dam_prob) |>
     round(2)
   
-  caption_text <- str_c("Probability of a hiit greater than ", dam_threshold,
+  caption_text <- str_c("Probability of a hit greater than ", dam_threshold,
                         " damage: ", ratio_over_threshold * 100, "%")
   
    dam_df |>
@@ -90,6 +98,10 @@ p2e_2d_dam_viz <- function (to_hit_mod, dam_mod, ac, dam_threshold){
 ```
 
 ```{r}
-p2e_2d_dam_viz(16, 4, 20, 7)
+p2e_2d_dam_viz(to_hit_mod =  11, 
+               dam_mod = 4, 
+               ac = 26, 
+               die_max = 12,
+               dam_threshold = 10)
 ```
 
